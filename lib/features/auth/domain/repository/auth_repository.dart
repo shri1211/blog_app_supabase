@@ -1,6 +1,6 @@
 import 'package:blog_app_supabase/core/error/failure.dart';
-import 'package:blog_app_supabase/features/auth/domain/entities/user.dart';
 import 'package:fpdart/fpdart.dart';
+import '../../../../core/entities/user.dart';
 
 abstract interface class AuthRepository {
   Future<Either<Failure, User>> signUpWithEmailPassword({

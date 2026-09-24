@@ -4,7 +4,7 @@ import 'package:blog_app_supabase/features/auth/domain/repository/auth_repositor
 
 import 'package:fpdart/fpdart.dart';
 
-import '../entities/user.dart';
+import '../../../../core/entities/user.dart';
 
 class CurrentUser implements UseCases<User, NoParams> {
   // here AuthRepository is coming from Domain Layer only

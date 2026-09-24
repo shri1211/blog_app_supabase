@@ -1,15 +1,18 @@
 import 'package:blog_app_supabase/core/error/exceptions.dart';
 import 'package:blog_app_supabase/core/error/failure.dart';
 import 'package:blog_app_supabase/features/auth/data/datasources/auth_remote_data_sources.dart';
+import 'package:blog_app_supabase/features/auth/data/models/user_model.dart';
 import 'package:fpdart/fpdart.dart'; //   import entire fpdart package
-import 'package:blog_app_supabase/features/auth/domain/entities/user.dart';
+import 'package:blog_app_supabase/core/entities/user.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as sb;
 
+import '../../../../core/networks/connection_checker.dart';
 import '../../domain/repository/auth_repository.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSources remoteDataSources;
-  const AuthRepositoryImpl(this.remoteDataSources);
+  final ConnectionChecker internetConnection;
+  const AuthRepositoryImpl(this.remoteDataSources, this.internetConnection);
   @override
   Future<Either<Failure, User>> loginWithEmailPassword({
     required String email,
@@ -50,6 +53,10 @@ class AuthRepositoryImpl implements AuthRepository {
   //  this function used mainly for re-usability
   Future<Either<Failure, User>> _getUser(Future<User> Function() fn) async {
     try {
+      if (!await (internetConnection.isConnected)) {
+        return Left(Failure("No Internet Connection"));
+      }
+
       final user = await fn();
       return right(user);
     } on sb.AuthException catch (e) {
@@ -63,6 +70,21 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, User>> currentUser() async {
     try {
+      //  need to hide first and run
+      if (!await (internetConnection.isConnected)) {
+        final session = remoteDataSources.currentUserSession;
+        if (session == null) {
+          return left(Failure("User is not Logged Inn"));
+        }
+        return Right(
+          UserModel(
+            id: session.user.id,
+            email: session.user.email ?? '',
+            name: '',
+          ),
+        );
+      }
+
       final user = await remoteDataSources.getCurrentUserData();
       if (user == null) {
         return left(Failure("User is not Logged Inn"));

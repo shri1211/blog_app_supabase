@@ -3,7 +3,7 @@ import 'package:blog_app_supabase/core/usecase/usecase.dart';
 import 'package:blog_app_supabase/features/auth/domain/repository/auth_repository.dart';
 import 'package:fpdart/fpdart.dart';
 
-import '../entities/user.dart';
+import '../../../../core/entities/user.dart';
 
 class UserLogin implements UseCases<User, UserLoginParams> {
   final AuthRepository authRepository;

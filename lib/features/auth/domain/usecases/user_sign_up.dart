@@ -1,8 +1,9 @@
 import 'package:blog_app_supabase/core/error/failure.dart';
 import 'package:blog_app_supabase/core/usecase/usecase.dart';
-import 'package:blog_app_supabase/features/auth/domain/entities/user.dart';
 import 'package:blog_app_supabase/features/auth/domain/repository/auth_repository.dart';
 import 'package:fpdart/fpdart.dart';
+
+import '../../../../core/entities/user.dart';
 
 //  generics takes only one as parameter
 class UserSignUp implements UseCases<User, UserSignUpParams> {
