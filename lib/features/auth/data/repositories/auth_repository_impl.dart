@@ -1,3 +1,4 @@
+import 'package:blog_app_supabase/core/constants/constants.dart';
 import 'package:blog_app_supabase/core/error/exceptions.dart';
 import 'package:blog_app_supabase/core/error/failure.dart';
 import 'package:blog_app_supabase/features/auth/data/datasources/auth_remote_data_sources.dart';
@@ -54,13 +55,11 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, User>> _getUser(Future<User> Function() fn) async {
     try {
       if (!await (internetConnection.isConnected)) {
-        return Left(Failure("No Internet Connection"));
+        return Left(Failure(Constants.noConnectionErrorMessage));
       }
 
       final user = await fn();
       return right(user);
-    } on sb.AuthException catch (e) {
-      return left(Failure(e.message));
     } on ServerExceptions catch (e) {
       return left(Failure(e.message));
     }
