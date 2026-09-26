@@ -2,37 +2,46 @@ import 'package:blog_app_supabase/features/blog/data/models/blog_model.dart';
 import 'package:hive/hive.dart';
 
 abstract interface class BlogLocalDataSources {
-  void uploadLocalBlogs({required List<BlogModel> blogs});
+  Future<void> uploadLocalBlogs({required List<BlogModel> blogs});
 
   List<BlogModel> loadBlogs();
 }
 
-//  create a concrete class
-
 class BlogLocalDataSourcesImpl implements BlogLocalDataSources {
   final Box box;
+
   BlogLocalDataSourcesImpl(this.box);
 
   @override
   List<BlogModel> loadBlogs() {
-    List<BlogModel> blogs = [];
-    box.read(() {
-      for (int i = 0; i < box.length; i++) {
-        blogs.add(BlogModel.fromJson(box.get(i.toString())));
+    final List<BlogModel> blogs = [];
+
+    for (final key in box.keys) {
+      final blogData = box.get(key);
+
+      if (blogData is Map) {
+        //  hive deserializes maps from disk as Map<dynamic, dynamic> , so it has
+        //  to be converted back before passing it to fromJson
+        blogs.add(
+          BlogModel.fromJson(Map<String, dynamic>.from(blogData)),
+        );
       }
-    });
+    }
+
     return blogs;
   }
 
   @override
-  void uploadLocalBlogs({required List<BlogModel> blogs}) {
-    // remove the all existing data in the box ,,  start fresh
-    blogs.clear();
+  Future<void> uploadLocalBlogs({required List<BlogModel> blogs}) async {
+    // Remove all existing data from Hive
+    await box.clear();
 
-    box.write(() {
-      for (int i = 0; i <= blogs.length; i++) {
-        box.put(i.toString(), blogs[i].toJson());
-      }
-    });
+    // Store fresh data
+    for (int i = 0; i < blogs.length; i++) {
+      await box.put(
+        i.toString(),
+        blogs[i].toCacheJson(),
+      );
+    }
   }
 }

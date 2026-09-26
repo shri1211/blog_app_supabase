@@ -16,9 +16,11 @@ void main() async {
   runApp(
     MultiBlocProvider(
       providers: [
-        BlocProvider(create: (_) => serviceLocator<AuthBloc>()),
-        BlocProvider(create: (_) => serviceLocator<AppUserCubit>()),
-        BlocProvider(create: (_) => serviceLocator<BlogBloc>()),
+        // these are get_it singletons, so use `value` (not `create`) so that
+        // BlocProvider does not close an instance it does not own
+        BlocProvider<AuthBloc>.value(value: serviceLocator<AuthBloc>()),
+        BlocProvider<AppUserCubit>.value(value: serviceLocator<AppUserCubit>()),
+        BlocProvider<BlogBloc>.value(value: serviceLocator<BlogBloc>()),
       ],
       child: const MyApp(),
     ),

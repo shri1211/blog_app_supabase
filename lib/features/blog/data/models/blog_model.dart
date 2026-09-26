@@ -24,10 +24,13 @@ class BlogModel extends Blog {
       updatedAt: json['updated_at'] == null
           ? DateTime.now()
           : DateTime.parse(json['updated_at']),
+      posterName: json['poster_name'] as String?,
     );
   }
 
   // Blog → JSON
+  //  this maps to the `blogs` table columns , so it must not contain
+  //  anything that is not an actual column ( like poster_name )
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -37,6 +40,14 @@ class BlogModel extends Blog {
       'image_url': imageUrl,
       'topics': topics,
       'updated_at': updatedAt.toIso8601String(),
+    };
+  }
+
+  // Blog → local cache entry , used only for Hive
+  Map<String, dynamic> toCacheJson() {
+    return {
+      ...toJson(),
+      'poster_name': posterName,
     };
   }
 

@@ -148,7 +148,14 @@ class _AddNewBlogPageState extends State<AddNewBlogPage> {
                               (e) => Padding(
                                 padding: const EdgeInsets.all(5.0),
                                 child: GestureDetector(
-                                  onTap: () {},
+                                  onTap: () {
+                                    if (selectedTopics.contains(e)) {
+                                      selectedTopics.remove(e);
+                                    } else {
+                                      selectedTopics.add(e);
+                                    }
+                                    setState(() {});
+                                  },
                                   child: Chip(
                                     label: Text(e),
                                     color: selectedTopics.contains(e)

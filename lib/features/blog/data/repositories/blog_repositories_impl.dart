@@ -69,7 +69,7 @@ class BlogRepositoriesImpl implements BlogRepositories {
       }
       final blogs = await blogRemoteDataSource.getAllBlogs();
       //  if internet connection is there upload to local storage then return
-      blogLocalDataSources.uploadLocalBlogs(blogs: blogs);
+      await blogLocalDataSources.uploadLocalBlogs(blogs: blogs);
 
       return right(blogs);
     } on ServerExceptions catch (e) {

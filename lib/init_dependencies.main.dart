@@ -10,34 +10,42 @@ Future<void> initDependencies() async {
     publishableKey: AppSecrets.supabaseAnon,
   );
 
-  Hive.defaultDirectory = (await getApplicationDocumentsDirectory()).path;
+  // Initialize Hive
+  await Hive.initFlutter();
 
-  serviceLocator.registerSingleton(() => supabase.client);
-  serviceLocator.registerLazySingleton(() => Hive.box(name: 'blogs'));
+  // Open Hive box
+  await Hive.openBox('blogs');
+
+  // Register core dependencies
+  serviceLocator.registerSingleton(supabase.client);
+
+  serviceLocator.registerLazySingleton<Box>(() => Hive.box('blogs'));
+
   serviceLocator.registerFactory(() => InternetConnection());
   //core
-  serviceLocator.registerSingleton(() => AppUserCubit());
+  serviceLocator.registerLazySingleton(() => AppUserCubit());
   // new instance have to be created every single time
   serviceLocator.registerFactory<ConnectionChecker>(
-        () => ConnectionCheckerImpl(serviceLocator()),
+    () => ConnectionCheckerImpl(serviceLocator()),
   );
 }
 
 void _initAuth() {
   serviceLocator.registerFactory<AuthRemoteDataSources>(
-        () => AuthRemoteDataSourcesImpl(serviceLocator()),
+    () => AuthRemoteDataSourcesImpl(serviceLocator()),
   );
 
   serviceLocator.registerFactory<AuthRepository>(
-        () => AuthRepositoryImpl(serviceLocator(), serviceLocator()),
+    () => AuthRepositoryImpl(serviceLocator(), serviceLocator()),
   );
+  serviceLocator.registerFactory(() => UserLogin(serviceLocator()));
 
   serviceLocator.registerFactory(() => UserSignUp(serviceLocator()));
 
   serviceLocator.registerFactory(() => CurrentUser(serviceLocator()));
 
   serviceLocator.registerLazySingleton(
-        () => AuthBloc(
+    () => AuthBloc(
       userSignUp: serviceLocator(),
       userLogin: serviceLocator(),
       currentUser: serviceLocator(),
@@ -51,11 +59,14 @@ void _initBlog() {
   //  Datasource
   serviceLocator
     ..registerFactory<BlogRemoteDataSource>(
-          () => BlogRemoteDataSourceImpl(serviceLocator()),
+      () => BlogRemoteDataSourceImpl(serviceLocator(),serviceLocator()),
     )
-  // repository
+    ..registerFactory<BlogLocalDataSources>(
+      () => BlogLocalDataSourcesImpl(serviceLocator()),
+    )
+    // repository
     ..registerFactory<BlogRepositories>(
-          () => BlogRepositoriesImpl(
+      () => BlogRepositoriesImpl(
         serviceLocator(),
         serviceLocator(),
         serviceLocator(),
@@ -64,7 +75,7 @@ void _initBlog() {
     ..registerFactory(() => UploadBlog(serviceLocator()))
     ..registerFactory(() => GetAllBlogs(serviceLocator()))
     ..registerLazySingleton(
-          () =>
+      () =>
           BlogBloc(uploadBlog: serviceLocator(), getAllBlogs: serviceLocator()),
     );
 
